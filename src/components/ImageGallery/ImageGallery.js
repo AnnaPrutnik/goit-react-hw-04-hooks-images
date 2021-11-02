@@ -1,41 +1,32 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
 import './ImageGallery.css';
-import { pixabaySearchPictures } from '../../services/pixabay-api';
+
 import ImageGalleryItem from '../ImageGalleryItem';
 import BtnLoadMore from '../Button';
 import Spinner from '../Loader';
 import Modal from '../Modal';
+import searchPictures from '../../services/pixabay-api';
 
-const search = new pixabaySearchPictures();
 const ImageGallery = ({ searchValue }) => {
   const [searchResults, setSearchResults] = useState([]);
   const [isLoaded, setIsLoaded] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [activePictureUrl, setActivePictureUrl] = useState('');
   const [activePictureAlt, setActivePictureAlt] = useState('');
-  const [page, setPage] = useState(1);
+  let page = useRef(1);
 
   useEffect(() => {
-    setSearchResults([]);
-    setPage(1);
-    search.page = 1;
-    search.query = searchValue;
+    resetQuery();
+
     searchPicture();
     scrollPage();
   }, [searchValue]);
 
-  const funcBtn = useCallback(() => {
-    if (page > 1) {
-      search.page = page;
-      searchPicture();
-      scrollPage();
-    }
-  }, [page]);
-
-  useEffect(() => {
-    funcBtn();
-  }, [funcBtn]);
+  const resetQuery = () => {
+    page.current = 1;
+    setSearchResults([]);
+  };
 
   const scrollPage = () => {
     const intervalId = setTimeout(() => {
@@ -50,7 +41,7 @@ const ImageGallery = ({ searchValue }) => {
   const searchPicture = async () => {
     try {
       setIsLoaded(true);
-      const res = await search.searchPictures();
+      const res = await searchPictures(searchValue, page.current);
       if (res.length > 0) {
         setSearchResults(state => [...state, ...res]);
         setIsLoaded(false);
@@ -62,7 +53,9 @@ const ImageGallery = ({ searchValue }) => {
   };
 
   const handleClickBtn = () => {
-    setPage(state => state + 1);
+    page.current += 1;
+    searchPicture();
+    scrollPage();
   };
 
   const handleClickPicture = e => {

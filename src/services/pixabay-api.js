@@ -1,33 +1,14 @@
 import axios from 'axios';
 
-export class pixabaySearchPictures {
-  constructor() {
-    this.baseURL = 'https://pixabay.com/api/';
-    this.key_api = '23114500-22e254b478d4c1f3e17503cc3';
-    this._query = '';
-    this._page = 1;
-    this.perPage = 12;
-  }
-  get query() {
-    return this._query;
-  }
-  set query(value) {
-    return (this._query = value);
-  }
+const BASE_URL = 'https://pixabay.com/api/';
+const KEY_API = '23114500-22e254b478d4c1f3e17503cc3';
+const PER_PAGE = 12;
 
-  get page() {
-    return this._page;
-  }
-  set page(number) {
-    return (this._page = number);
-  }
-
-  searchPictures() {
-    axios.defaults.baseURL = this.baseURL;
-    return axios
-      .get(
-        `?q=${this._query}&page=${this._page}&key=${this.key_api}&image_type=photo&orientation=horizontal&per_page=${this.perPage}`,
-      )
-      .then(result => result.data.hits);
-  }
+export default function searchPictures(searchQuery, searchPage) {
+  axios.defaults.baseURL = BASE_URL;
+  return axios
+    .get(
+      `?q=${searchQuery}&page=${searchPage}&key=${KEY_API}&image_type=photo&orientation=horizontal&per_page=${PER_PAGE}`,
+    )
+    .then(result => result.data.hits);
 }
